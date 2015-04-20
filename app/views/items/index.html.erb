@@ -1,0 +1,88 @@
+<p id="notice" style="text-align: center"><%= notice %></p>
+
+<div style="text-align: center">
+  <%= link_to 'New Item', new_item_path %>
+</div>
+
+<h1 style="cursor: pointer; text-align: center;">
+  <span id="previous" style="float: left; display:none">&lt;</span>
+  Listing Items
+  <span id="next" style="cursor: pointer; float: right; display: none">&gt;</span>
+</h1>
+
+<% @items.each_with_index do |item, i| %>
+  <div class="item" id="<%= item.id %>" style="display: none; text-align: center">
+    <div class="position">
+      Showing <%= i+1 %> of <%= @items.length %>
+    </div>
+
+    <div class="link">
+      <%= link_to (item.name || item.link), item.link %> (rank <%= item.prio %>)
+    </div>
+
+    <div class="actions">
+      <%= link_to 'Edit Item', edit_item_path(item) %> | <%= link_to 'Remove Item', item_path(item), method: :delete %>
+    </div>
+
+    <iframe height="600px" src="<%= item.link %>" style="display: block; margin: 0 auto;">
+    </iframe>
+  </div>
+<% end %>
+
+<script type="text/javascript">
+  $(function(){
+    var resizeIframes = function(){
+      var widthCorrection = 80;
+      var width = Math.min(document.documentElement.clientWidth, window.innerWidth || 0) - widthCorrection;
+
+
+      $('iframe').attr('width', width);
+    };
+
+    var itemDivs = $('div.item'),
+      previousLink = $('#previous'),
+      nextLink = $('#next'),
+      currentPosition,
+      items = <%= raw(@items.to_json(only: [:id, :name, :link, :prio])) %>;
+
+    var showItemDiv = function(position){
+      itemDivs.hide();
+      $(itemDivs[position]).show();
+      currentPosition = position;
+
+      if(position > 0){
+        previousLink.show();
+      }
+      else {
+        previousLink.hide();
+      }
+
+      if(position < itemDivs.length - 1){
+        nextLink.show();
+      }
+      else {
+        nextLink.hide();
+      }
+    }
+
+    document.body.onresize = resizeIframes;
+    resizeIframes();
+
+    $('#next').click(function(){
+      showItemDiv(currentPosition + 1);
+    });
+
+    $('#previous').click(function(){
+      showItemDiv(currentPosition - 1);
+    });
+
+    if(itemDivs.length > 0){
+      showItemDiv(0);
+    }
+
+    setTimeout(function(){
+      $('#notice').fadeOut(1000);
+    }, 5000);
+  });
+</script>
+
